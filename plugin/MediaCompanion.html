@@ -1,0 +1,226 @@
+<!DOCTYPE html> 
+<html>
+
+<head>
+	<title>HeadsetDetector</title> 
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+        <style type="text/css">
+        </style>
+</head> 
+
+<body> 
+
+<div data-role="page" data-theme="a">
+
+	<div data-role="header" data-position="fixed">
+		<a href='#' class='ui-btn-left' data-icon='arrow-l' data-theme="c" onclick="history.back(); return false">Back</a> 
+		<h1>HeadsetDetector</h1>
+	</div><!-- /header -->
+
+	<div data-role="content">	
+		<H3>Introduction</H3>
+		<br>
+		<P>I made this plugin so a DroidScript app can have access to wired and wireless headset connectivity information. With this plugin, apps can know when a headset is disconnected, IE to pause media, connected, IE to resume media, and request "audio focus", which causes other apps to pause their media if the app builder permits. Headset Detector has functions for the basics, as well as advanced functions for minute detail.</P>
+		<br>
+		<H3>Including HeadsetDetector In Your Project</H3>
+		<p>In order to use HeadsetDetector, you must first load the plugin at the top of your script 
+		using the <b>LoadPlugin</b> method like this:</p>
+
+		<div class="samp">&nbsp;app.LoadPlugin("HeadsetDetector");</div>
+
+		<p>Then you can create an instance of the plugin object when you need it like this:</p>
+		<div class="samp">&nbsp;detector = app.CreateHeadsetDetector();</div>
+
+		<br>
+		<H3>Example:</H3>
+		<P>This example demonstrates the basics, but much more detail is available from the plugin, as shown below. Wile the example is running, plug/connect, and unplug/disconnect wired and/or bluetooth audio devices. Wired and wireless devices are detected. Use the button to view the current state without waiting for an OnChange event.</P>
+		<br>
+		<div data-role="collapsible" data-collapsed="true"  data-mini="true" data-theme="a" data-content-theme="b">
+			<h4>Example - Using The Plugin</h4>
+			<div id="examp1" style="font-size:70%">
+				app.LoadPlugin( "HeadsetDetector" );<br>
+				<br>
+				function OnStart() {<br>
+				 &nbsp;&nbsp;lay = app.CreateLayout( "Linear", "VCenter,FillXY" );<br><br>
+				 &nbsp;&nbsp;btn = app.CreateButton( "Get Headset Status" );<br>				
+				 &nbsp;&nbsp;btn.SetOnTouch(showState);<br>
+				 &nbsp;&nbsp;lay.AddChild( btn );<br><br>
+				 <b id="snip1"  style="font-size:100%">
+				 &nbsp;&nbsp;headsetDetector = app.CreateHeadsetDetector();<br>
+				 &nbsp;&nbsp;headsetDetectorVersion = headsetDetector.GetVersion();<br>
+				 &nbsp;&nbsp;headsetDetector.SetOnChange(onChange); //Sets a function to be called when headset status changes.<br>
+				 &nbsp;&nbsp;headsetDetector.SetOnDeviceChange(onDeviceChange); //Sets a function to be called when headset status changes.<br>
+				 &nbsp;&nbsp;headsetDetector.SetOnNoisy(onNoisy); //Sets a function to be called when no audio devices (accept built in devices) are connected.<br>
+				 <br>
+				 &nbsp;&nbsp;app.AddLayout( lay );<br>
+				}<br>
+				<br>
+				function showState() {<br>
+				&nbsp;&nbsp;app.Alert("HeadsetDetector version " + headsetDetectorVersion + ", " + headsetDetector.GetHeadsetState(), "Get Status");<br>
+				}<br><br>
+			function onChange(state) {<br>
+				&nbsp;&nbsp;app.Alert("Headset state changed to " + state + ".", "OnChange Event");<br>
+				}<br><br>
+			function onDeviceChange(state) {<br>
+				&nbsp;&nbsp;app.Alert("Device connection changed: " + state + ".", "OnDeviceChange Event");<br>
+				}<br><br>
+			function onNoisy() {<br>
+				&nbsp;&nbsp;app.Alert("Device has no connections, it's noisy.", "OnNoisy Event");<br>
+				}<br><br>
+			</div>
+			<div name="divCopy" align="right">
+			<a href="#" data-role="button" data-mini="true" data-inline="true" onclick="copy(snip1)">&nbsp;&nbsp;Copy&nbsp;&nbsp;</a>
+			<a href="#" data-role="button" data-mini="true" data-inline="true" onclick="copy(examp1)">Copy All</a>
+			<a href="#" data-role="button" data-mini="true" data-inline="true" onclick="demo(examp1)">&nbsp;&nbsp;&nbsp;Run&nbsp;&nbsp;&nbsp;</a>
+			</div>
+			<H3>Methods</H3>
+<H4>AbandonAudioFocus()</H4>
+<P>This releases audio focus previously requested in your app. This function should <B>always</B> be called when your app is done playing audio, including when your app exits.</P>
+			<H4>GetHeadsetState</H4>
+			<P>This function takes no arguments, and returns a boolean representing the current connection state.</P>
+<H6>Headset State Boolean</H6>
+<UL>
+<LI><B>false</B>, Indicates that no audio devices are connected.</LI>
+<LI><B>true</B>, indicates that at least one audio device is connected.</LI>
+</UL>
+<P>Check out the above example to see all this in motion.</P>
+			<H4>SetOnChange(Callback)</H4>
+			<P>SetOnChange takes one callback function to handle change events.</P>
+			<P>The callback will be called when a headset or headphones are connected or Disconnected.</P>
+			<H6>onChange(state), the SetOnChange callback function</H6>
+<P>The SetOnChange callback function will be called with a boolean.</P>
+<UL>
+<LI><B>true</B>, indicates an audio device has been connected.</LI>
+<LI><B>false</B>, indicates that one of the currently connected audio devices has been disconnected.</LI>
+</UL>
+<P>Note that if false is passed to your callback function, this does not mean nothing is connected, just that one thing is no longer connected. For example, suppose the user of your app is listening to media on a bluetooth speaker, but now wants to listen with headphones. In this example, your callback function will be called. First with true as the user connects the headphones, then with false as the user disconnects and powers the bluetooth speaker down. If you want to know weather something is connected for sure, listen for the OnNoisy event, or use the GetHeadsetState function.</P>
+<H4>SetOnDeviceChange(callback)</H4>
+<P>The OnDeviceChange is fired when a device, wired or bluetooth, is connected or disconnected. The callback will be passed a string. Below is a list of possible strings and their meanings.</P>
+<H6>OnDeviceChange callback(String), possible arguments passed</H6>
+<table><tr><th>String</TH><TH>Meaning</TH>
+</tr><tr>
+<td>"unpluged"</td>
+<td>A wired audio device has been unplugged from the system.</td>
+</tr><tr>
+<td>"pluged"</td>
+<td>A wired audio device has been connected.</td>
+</tr><tr>
+<td>"noisy"</td>
+<td>No audio devices are connected, using built in speakers. The device is now noisy.</td>
+</tr><tr>
+<td>"disconnected"</td>
+<td>A bluetooth audio device has been disconnected.</td>
+</tr><tr>
+<td>"connected"</td>
+<td>A bluetooth audio device has been connected to the system.</td>
+</tr>
+</table>
+			<H4>SetOnFocusChange(Callback)</H4>
+			<P>SetOnFocusChange takes one callback function to handle change events.</P>
+			<P>The callback will be called when your another app wants audio focus.</P>
+			<H6>onFocusChange(info), the SetOnFocusChange callback function</H6>
+<P>As the user runs other apps, they may request all apps to stop playing so the new app can begin. Likewise, when an app is done, other apps will be informed that focus is available by the system.
+The SetOnFocusChange callback function will be called with a string denoting how audio focus has changed.</P>
+<P>Possible strings and their meanings are listed below.</P>
+<table>
+<tr>
+<th>String</th>
+<th>Meaning</th>
+</tr>
+<tr>
+<td>"Gain"</td>
+<td>Your app now has audio focus.</td>
+</tr>
+<tr>
+<td>"Loss"</td>
+<td>Your app does not have audio focus and should stop playing media.</td>
+</tr>
+<tr>
+<td>"Pause"</td>
+<td>Another app wants to play a sound, IE a notification sound, and will return focus when done.</td>
+</tr>
+<tr>
+<td>"Duck"</td>
+<td>Another app wants to play a sound, but your app can duck the audio. Ducking means you lower the volume for a moment, causing the media volume to "duck" under the new sound.</td>
+</tr>
+<tr>
+<td>"Unknown"</td>
+<td>This indicates that the new type of focus is unrecognized.</td>
+</tr>
+</table>
+<H4>SetOnMedia(callback)</h4>
+<P>This registers your function for media key events. For example: Previous, Next, etc. These can be buttons pushed on a bluetooth device, on a wired headphones, and/or from a keyboard</P>
+<H6>OnMedia callback</H6>
+<P>Your callback will be passed a string. This string's format is: "<Key> <down/up>" The first word will always be the name of the key pressed. See below for possible strings. The last word will indicate weather the key has been pressed or released.</P>
+<UL>
+<LI>"hook", the headset button, IE answer/end call.</LI>
+<LI>"next", the next track  button</LI>
+<LI>"prev", the previous track button.</LI>
+<LI>"play", play button</LI>
+</UL>
+<H4>SetOnNoisy(callback)</H4>
+<P>This event fires when the last audio device has been disconnected. This is a good time to pause media. The system will play its audio through its built in speakers. No parameters are passed to the callback.
+<H4>Requesting Audio Focus</H4>
+The following methods request audio focus for varried lengths of time. They each call a callback when the request is complete, passing a string with the result of the request.</P>
+
+<TABLE><TR>
+<TH>Function</TH><TH>description</TH>
+</TR><TR>
+<TD>RequestAudioFocus</td>
+<td>Request the audio focus for an unknown length of time, IE playing a song, watching a movie, etc.</td>
+</tr><tr>
+<TD>RequestShortAudioFocus</td>
+<td>Request audio focus for a short time, IE notification sounds, brief tts, etc.</td>
+</tr><tr>
+<TD>RequestExclusiveShortAudioFocus</td>
+<td>This works as RequestShortAudioFocus above does, however no other apps should play sound until your app is done playing audio and releases audio focus.</td>
+</tr><tr>
+<TD>RequestDuckingAudioFocus</td>
+<td>Request focus for a short time, just as RequestShortAudioFocus works, however this lets apps know they dont have to stop playing audio, but should lower the volume of their media.</td>
+</tr>
+</table>
+<H6>Responce</H6>
+<P>The above functions require a callback function, to notify your app when the request is complete, and what the result was.</P>
+<P>This callback will be passed a string with the result of your request. Below are possible values and their meanings.</P>
+<UL>
+<LI>"Granted", the request was successful, yyour app has audio.</LI>
+<LI>"Delayed", your app will soon receive audio focus, but this is delayed. The OnFocusChange event will indicate when your request is granted.</LI>
+<LI>"Failed", The request failed.</LI>
+<LI>"Unknown", the response to your is unknown.</LI>
+</UL>
+<H3>License And Credits</H3>
+		<P>My role has been more like that of Frankenstine, I ported an already existing Cordova plugin, snipping a part here, changing a part there, but the original is still a huge part of this plugin. I also had help along the way.</P>
+		<P>I ported this plugin from a cordova plugin, downloaded March 26, 2020.. If you have any questions, I'd be happy to help if I can. My contact info is below.</P>
+		<P>The original is: HeadsetDetection-PhoneGap-Plugin by Eddy Verbruggen. It can be found <A HREF="https://github.com/EddyVerbruggen/HeadsetDetection-PhoneGap-Plugin">on GitHub.</A>
+<P>Special thanks to Laurent Prott, who added bluetooth support to this pluin.</P>
+<P>The original plugin was released under the MIT license, so this DroidScript port is released under the same license.</P>
+		</div>
+		<H3>MIT License</H3>
+<P>Copyright (c) 2020 Jason Custer (jscuster@gmail.com). This is a port from <A HREF="https://github.com/EddyVerbruggen/HeadsetDetection-PhoneGap-Plugin">HeadsetDetection-PhoneGap-Plugin</A> by <A HREF="https://github.com/EddyVerbruggen">Eddy Verbruggen,</A>, who holds the original copyright of <A HREF="https://github.com/EddyVerbruggen/HeadsetDetection-PhoneGap-Plugin">HeadsetDetection-PhoneGap-Plugin</A>, released under the MIT license.</P>
+
+<P>Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:</P>
+
+<OL>
+<LI>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</LI>
+
+<LI>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</LI>
+</OL>
+<H3>Thank you</H3>
+<P>Thank you for checking out this plugin. If you use it in a project, it would be nice if you'd email me. I'd like to see how my baby plugin grows up. Any questions or feedback can be sent to me, <a href="mailto:jscuster@gmail.com?subject=Headset Detector">jscuster@gmail.com</a>. I am the only coder/developer here, so I can only help with this plugin. It is my hope to release a version soon with media button detection, <play/pause, previous/next track, and headset button>. </P>
+	</div><!-- /content -->
+	
+</div><!-- /page -->
+
+</body>
+</html>
