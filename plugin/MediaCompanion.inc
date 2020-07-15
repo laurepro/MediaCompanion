@@ -13,8 +13,8 @@ app.CreateMediaCompanion = function() {
 	}; //GetVersion
 
 	//state: true = connected.
-	res.SendAvrcpMeta = function() {
-		return plugin.Send("SendAvrcpMeta") === "Connected";
+	res.SendAvrcpMeta = function(p1) {
+		plugin.Send("SendAvrcpMeta", p1);
 	}; //SendAvrcpMeta
 
 	//set callback for onSignalStatusChange event.

@@ -24,9 +24,10 @@ public class MediaCompanion
 	private Method m_callscript;
 	private Object m_parent;
 	private Context m_ctx;
-	private AudioManager mAudioManager;
-	private MediaMetadata metadata;
-	private MediaSession mMediaSession;
+	private AudioManager m_audio_manager;
+//	private MediaMetadata metadata;
+	private RemoteControlClient mRemoteControlClient;
+	private MediaSession m_media_session;
 	private String m_onSignalStatusChangeCallback;
 	BroadcastReceiver receiver;
 
@@ -67,7 +68,10 @@ public class MediaCompanion
 		{
 			Log.d(TAG, "Initialising plugin object");
 			m_ctx = ctx;
-			mAudioManager = (AudioManager)(m_ctx).getSystemService(Context.AUDIO_SERVICE);
+			m_audio_manager = (AudioManager)(m_ctx).getSystemService(Context.AUDIO_SERVICE);
+			m_media_session = new MediaSession(m_ctx,"radioTSF");
+            m_media_session.setFlags(MediaSession.FLAG_HANDLES_TRANSPORT_CONTROLS);
+            m_media_session.setActive(true);
 			m_parent = parent;
 			m_callscript = parent.getClass().getMethod("CallScript", Bundle.class);
 			IntentFilter intentFilter = new IntentFilter();
@@ -88,6 +92,7 @@ public class MediaCompanion
 		if (this.receiver != null) try
 			{
 				m_ctx.unregisterReceiver(this.receiver);
+				m_media_session.release();
 				this.receiver = null;
 			}
 			catch (Exception e)
@@ -130,10 +135,7 @@ public class MediaCompanion
 			}
 			else if (cmd.equals("SendAvrcpMeta"))
 			{
-				String p1 = b.getString("p1");
-				String p2 = b.getString("p2");
-				String p3 = b.getString("p3");
-				SendAvrcpMeta(p1, p2, p3);
+				SendAvrcpMeta(b);
 			}
 			else if (cmd.equals("SetOnSignalStatusChange"))
 			{
@@ -155,17 +157,15 @@ public class MediaCompanion
 	} //GetVersion
 
 	//Handle the 'SendAvrcpMeta' command.
-	private void SendAvrcpMeta(String title, String artist, String album)
+	private void SendAvrcpMeta(Bundle b)
 	{
-		Log.d(TAG, "Got 'SendAvrcpMeta'");
+		Log.d(TAG, "Got SendAvrcpMeta " + b.getString("p1") );
 		// Return if Bluetooth A2DP is not in use.
-		if (!mAudioManager.isBluetoothA2dpOn()) return;
+		if (!m_audio_manager.isBluetoothA2dpOn()) return;
 		MediaMetadata metadata = new MediaMetadata.Builder()
-			.putString(MediaMetadata.METADATA_KEY_TITLE, title)
-			.putString(MediaMetadata.METADATA_KEY_ALBUM, album)
-			.putString(MediaMetadata.METADATA_KEY_ARTIST, artist)
+			.putString(MediaMetadata.METADATA_KEY_TITLE, b.getString("p1"))
 			.build();
-		mMediaSession.setMetadata(metadata);			
+		m_media_session.setMetadata(metadata);		
 	} //SendAvrcpMeta
 
 	//Handle the 'onSignalStatusChange' command.
