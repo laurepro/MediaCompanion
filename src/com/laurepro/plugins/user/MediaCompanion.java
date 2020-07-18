@@ -25,8 +25,6 @@ public class MediaCompanion
 	private Object m_parent;
 	private Context m_ctx;
 	private AudioManager m_audio_manager;
-//	private MediaMetadata metadata;
-	private RemoteControlClient mRemoteControlClient;
 	private MediaSession m_media_session;
 	private String m_onSignalStatusChangeCallback;
 	BroadcastReceiver receiver;
